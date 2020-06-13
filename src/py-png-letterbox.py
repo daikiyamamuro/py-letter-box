@@ -64,18 +64,22 @@ def execute_file(path):
   cv2.imwrite(f'{dirname}\\{path_without_ext}_letterbox{ext}', overlay_image)
 
 
-def execute_dir(path, exts):
-  if os.path.isdir(path):
-    for file in os.listdir(path):
-        execute_dir(f'{path}\\{file}', exts)
-  else:
-    for ext in exts:
-      if(path.endswith(ext)):
-        execute_file(path)
+def execute_dir(dir, exts):
+  for item in os.listdir(dir):
+    path = f'{dir}\\{item}'
+    if os.path.isdir(path):
+        execute_dir(path, exts)
+    else:
+      for ext in exts:
+        if(item.endswith(ext)):
+          try:
+            execute_file(path)
+          except Exception as err:
+            print(str(err))
 
 
 if __name__ == "__main__":
   try:
-    execute_dir('.', ['.png'])
+    execute_dir(os.getcwd(), ['.png'])
   except Exception as err:
     print(str(err))
