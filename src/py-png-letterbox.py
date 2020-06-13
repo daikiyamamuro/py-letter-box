@@ -3,7 +3,11 @@ import cv2
 import numpy as np
 from PIL import Image
 
-MIN_WIDTH = 1200
+MIN_WIDTH = int(input('最小幅を入力してください:'))
+R = int(input('Rを入力してください:'))
+G = int(input('Gを入力してください:'))
+B = int(input('Bを入力してください:'))
+
 
 
 # 画像のオーバーレイ関数
@@ -45,6 +49,10 @@ def execute_file(path):
 
   # 幅が最低幅、高さが元画像と同じのまっくろ画像を生成
   blank_img = np.zeros((height, MIN_WIDTH, 3))
+  # ここに
+  for h in range(0, height):
+    for w in range(0, MIN_WIDTH):
+      blank_img[h, w] = [B, G, R]
 
   # 一旦ファイルに保存してcv画像として再読み込み
   blank_img_path = 'blank.png'
