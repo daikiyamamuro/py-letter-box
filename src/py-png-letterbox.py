@@ -1,13 +1,15 @@
 import os
+import tkinter
+import tkinter.filedialog
+import tkinter.messagebox
 import cv2
 import numpy as np
 from PIL import Image
 
-MIN_WIDTH = int(input('最小幅を入力してください:'))
-R = int(input('Rを入力してください:'))
-G = int(input('Gを入力してください:'))
-B = int(input('Bを入力してください:'))
-
+MIN_WIDTH = 0
+R = 0
+G = 0
+B = 0
 
 
 # 画像のオーバーレイ関数
@@ -86,8 +88,21 @@ def execute_dir(dir, exts):
             print(str(err))
 
 
-if __name__ == "__main__":
+def select_dir():
+  tkinter.messagebox.showinfo('py-img-letterbox', '対象フォルダを選択してください。')
+  selected_dir = tkinter.filedialog.askdirectory()
+  return selected_dir
+
+
+if __name__ == '__main__':
   try:
-    execute_dir(os.getcwd(), ['.png'])
+    selected_dir = select_dir()
+    if selected_dir != '':
+
+      MIN_WIDTH = int(input('最小幅を入力してください:'))
+      R = int(input('R(赤)を入力してください:'))
+      G = int(input('G(緑)を入力してください:'))
+      B = int(input('B(青)を入力してください:'))
+      execute_dir(selected_dir, ['.png', '.jpg', '.jpeg'])
   except Exception as err:
     print(str(err))
