@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 
 MIN_WIDTH = 0
+MIN_HEIGHT = 0
 R = 0
 G = 0
 B = 0
@@ -35,6 +36,7 @@ def overlayImage(src, overlay, location):
 
 
 def execute_file(path):
+
   # 画像の読み込み
   src_img = cv2.imread(path)
 
@@ -42,18 +44,20 @@ def execute_file(path):
   height = src_img.shape[0]
   width = src_img.shape[1]
 
-  # 最低幅以上の画像にはレターボックス画像を作成しない
-  if MIN_WIDTH <= width:
+  # 最低幅以上かつ最低高さ以上の大きさの画像はレターボックス画像を作成しない
+  if MIN_HEIGHT <= height and MIN_WIDTH <= width:
     return
 
+  lb_height = MIN_HEIGHT if height < MIN_HEIGHT else height
+  lb_width = MIN_WIDTH if width < MIN_WIDTH else width
 
   # ##### 以下はレターボックスを作成する処理 #####
 
-  # 幅が最低幅、高さが元画像と同じのまっくろ画像を生成
-  blank_img = np.zeros((height, MIN_WIDTH, 3))
+  # レターボックスサイズの単色画像を生成
+  blank_img = np.zeros((lb_height, lb_width, 3))
   # ここに
-  for h in range(0, height):
-    for w in range(0, MIN_WIDTH):
+  for h in range(0, lb_height):
+    for w in range(0, lb_width):
       blank_img[h, w] = [B, G, R]
 
   # 一旦ファイルに保存してcv画像として再読み込み
@@ -63,7 +67,10 @@ def execute_file(path):
   os.remove(blank_img_path)
 
   # 重ね合わせた画像
-  overlay_image = overlayImage(blank_img, src_img, (int(MIN_WIDTH / 2 - width / 2), 0))
+  x_pos = int(MIN_WIDTH / 2 - width / 2) if width < MIN_WIDTH else 0
+  y_pos = int(MIN_HEIGHT / 2 - height / 2) if height < MIN_HEIGHT else 0
+  overlay_image = overlayImage(
+      blank_img, src_img, (x_pos, y_pos))
 
   # 保存先
   dirname = os.path.dirname(path)
@@ -94,15 +101,59 @@ def select_dir():
   return selected_dir
 
 
+def input_RGB(R_or_G_or_B):
+  color = 0
+  try:
+    color = int(input(f'{R_or_G_or_B}を入力してください(0~255):'))
+    if 0 <= color and color < 255:
+      return (True, color)
+  except:
+    pass
+  print('0~255の範囲で入力してください。')
+  return (False, color)
+
+
+def ask_RGB(R_or_G_or_B):
+  while True:
+    R = input_RGB(R_or_G_or_B)
+    if R[0]:
+      break
+  return R[1]
+
+
+def input_nonnegative_integer(text):
+  i = 0
+  try:
+    i = int(input(text))
+    if 0 < i:
+      return (True, i)
+  except:
+    pass
+  print('0より大きい数字で入力してください。')
+  return (False, i)
+
+
+def ask_nonnegative_integer(text):
+  while True:
+    result = input_nonnegative_integer(text)
+    if result[0]:
+      break
+  return result[1]
+
+
+
 if __name__ == '__main__':
   try:
     selected_dir = select_dir()
     if selected_dir != '':
-
-      MIN_WIDTH = int(input('最小幅を入力してください:'))
-      R = int(input('R(赤)を入力してください:'))
-      G = int(input('G(緑)を入力してください:'))
-      B = int(input('B(青)を入力してください:'))
+      MIN_WIDTH = ask_nonnegative_integer('最小幅を入力してください:')
+      MIN_HEIGHT = ask_nonnegative_integer('最小高さを入力してください:')
+      R = ask_RGB('R(赤)')
+      G = ask_RGB('G(緑)')
+      B = ask_RGB('B(青)')
       execute_dir(selected_dir, ['.png', '.jpg', '.jpeg'])
+      print('完了しました。')
   except Exception as err:
+    print('エラーが発生しました。')
     print(str(err))
+  input('何かキーを押してください..')
