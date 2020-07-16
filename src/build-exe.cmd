@@ -1,1 +1,1 @@
-pyinstaller py-letter-box.py --onefile --noconsole
+pyinstaller py-letter-box.py --onefile
